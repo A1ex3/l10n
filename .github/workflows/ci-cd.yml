@@ -29,9 +29,8 @@ jobs:
 
         - name: Packing
           run: |
-            mkdir l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}
-            cp -r l10n l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}/
-            tar -czvf l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}.tar.gz l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}/
+            rm l10n/__pycache__ l10n/l10n.egg-info
+            tar -czvf l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}.tar.gz l10n/
   
         - name: Create GitHub Release
           id: create_release

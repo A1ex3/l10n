@@ -35,7 +35,7 @@ jobs:
   
         - name: Create GitHub Release
           id: create_release
-          if: startsWith(env.python-version, '3.10')
+          if: startsWith(matrix.python-version, '3.10')
           uses: softprops/action-gh-release@v1
           with:
               files: l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}.tar.gz

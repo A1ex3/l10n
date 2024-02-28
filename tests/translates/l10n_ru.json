@@ -1,0 +1,14 @@
+{
+    "helloWorld": "Привет мир",
+    "bye": "Пока {value}",
+    "#bye": {
+        "description": "Прощание с кем-то",
+        "example": "Пока мир",
+        "variables": {
+            "value": {
+                "defaultValue": "Мир",
+                "type": "string"
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "helloWorld": "Hello World",
+    "bye": "Bye {value}",
+    "#bye": {
+        "description": "Saying goodbye to someone",
+        "example": "Bye World",
+        "variables": {
+            "value": {
+                "defaultValue": "World",
+                "type": "string"
+            }
+        }
+    },
+    "numberOfUsers": "Number of users: {number}",
+    "#numberOfUsers": {
+        "variables": {
+            "number": {
+                "defaultValue": 0,
+                "type": "int"
+            },
+            "values": {
+                "type": "string"
+            }
+        }
+    }
+}

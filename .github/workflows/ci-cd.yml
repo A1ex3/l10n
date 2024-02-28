@@ -1,0 +1,43 @@
+name: Testing and publishing
+
+on: [push]
+
+env:
+    PROGRAMMING_LANGUAGE: python
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+        - uses: actions/checkout@v4
+
+        - name: Get version from setup.py
+          run: echo "VERSION=$(grep -oP "(?<=version=')[^']+" l10n/setup.py)" >> $GITHUB_ENV
+
+
+        - name: Installing python libraries
+          run: make -f tests/Makefile init
+
+        - name: Tests
+          run: make -f tests/Makefile test
+
+        - name: Packing
+          run: |
+            mkdir l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE
+            cp l10n l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE/
+            tar -czvf l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE.tar.gz l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE/
+  
+        - name: Create GitHub Release
+          id: create_release
+          uses: softprops/action-gh-release@v1
+          with:
+              files: l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE.tar.gz
+              tag_name: ${{ env.VERSION }}_$PROGRAMMING_LANGUAGE
+          env:
+              GITHUB_TOKEN: ${{ secrets.ACTIONS }}

@@ -29,15 +29,15 @@ jobs:
 
         - name: Packing
           run: |
-            mkdir l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE
-            cp -r l10n l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE/
-            tar -czvf l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE.tar.gz l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE/
+            mkdir l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}
+            cp -r l10n l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}/
+            tar -czvf l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}.tar.gz l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}/
   
         - name: Create GitHub Release
           id: create_release
           uses: softprops/action-gh-release@v1
           with:
-              files: l10n_${{ env.VERSION }}_$PROGRAMMING_LANGUAGE.tar.gz
-              tag_name: ${{ env.VERSION }}_$PROGRAMMING_LANGUAGE
+              files: l10n_${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}.tar.gz
+              tag_name: ${{ env.VERSION }}_${{env.PROGRAMMING_LANGUAGE}}
           env:
               GITHUB_TOKEN: ${{ secrets.ACTIONS }}

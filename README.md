@@ -99,6 +99,12 @@ className: AppLocalization
 }
 ```
 
+| Types  |
+|--------|
+| string |
+| int    |
+| float  |
+
 #### Table of optional values to be filled in.
 
 | Key | Description |

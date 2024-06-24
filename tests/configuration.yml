@@ -1,4 +1,0 @@
-pathToTranslates: tests/translates/
-pathToOut: tests/app_localization.py
-defaultTranslateFile: l10n_en.json
-className: AppLocalization

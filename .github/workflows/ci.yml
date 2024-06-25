@@ -53,14 +53,14 @@ jobs:
       BUILD_PATH: build/l10n
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Write appinfo data to environment variables
         shell: bash
         run: |
             source ${{env.APPINFO_FILE}}
             echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5

@@ -9,39 +9,31 @@
 ## How to use
 ### Downloading the library.
 ```bash
-wget https://github.com/A1ex3/l10n/releases/download/{version}_{programming language}/{file}
+wget https://github.com/A1ex3/l10n/releases/download/{version}/{file}
 ```
 #### Example.
 ```bash
-wget https://github.com/A1ex3/l10n/releases/download/0.0.1_python/l10n_0.0.1_python.tar.gz
-```
-
-### Unpack the archive.
-```bash
-tar -xvf l10n_0.0.1_python.tar.gz
-```
-
-### Library installation.
-```bash
-pip install -e l10n 
+wget https://github.com/A1ex3/l10n/releases/download/1.0.0/l10n_windows.exe
 ```
 
 ### Creating a configuration file.
 
 #### Example `configuration.yml`.
 ```yaml
-pathToTranslates: app/translates/
-pathToOut: app/app_localization.py
-defaultTranslateFile: l10n_en.json
-className: AppLocalization
+dir: app/translates/
+output_localization_file: app/app_localization.py
+template: en
+class_name: AppLocalization
+programming_language: Python
 ```
 
 | Parameter | Description |
 |-----------|-------------|
-| pathToTranslates | Path to the directory with translations where l10n_language.json files are stored. |
-| pathToOut | The path where the file will be generated, you must first create a directory where the file will be saved. |
-| defaultTranslateFile | Default translation file where the translation status will always be 100%, no need to specify the full path to the file, just the name. |
-| className | The name of the class whose name will be assigned to the main class. |
+| dir | Path to the directory with translations where l10n_language.json files are stored. |
+| output_localization_file | The path where the file will be generated, you must first create a directory where the file will be saved. |
+| template | Default translation where the translation status will always be 100%, no need to specify the full path to the file, just the name. |
+| class_name | The name of the class whose name will be assigned to the main class. |
+| programming_language | Programming language for which the code will be generated. |
 
 ### Creating a translation file.
 #### Example.
@@ -115,106 +107,97 @@ className: AppLocalization
 | defaultValue | |
 
 ### Generation.
-```bash
-python -m l10n.generator --config="app/configuration.yml"
+```powershell
+.\build\l10n.exe -FILE .\build\config.yml
 ```
 
 | Key | args |
 |-----|-------------|
-| --configuration | Path to configuration [file](#example-configurationyml) |
+| -FILE | Path to configuration [file](#example-configurationyml) |
+
+or
+
+### Generation.
+```powershell
+.\build\l10n.exe -DIR "app/translates/" -TEMPLATE "en" -OUTPUT_LOCALIZATION_FILE "app/app_localization.py" -PROGRAMMING_LANGUAGE "Python" -CLASS_NAME "AppLocalization"
+```
+
+| Key | args |
+|-----|-------------|
+| -DIR | |
+| -TEMPLATE | |
+| -OUTPUT_LOCALIZATION_FILE | |
+| -PROGRAMMING_LANGUAGE | |
+| -CLASS_NAME | |
 
 ### Result `app_localization.py`.
 ```python
-#NOTE THIS IS AN AUTO-GENERATED FILE, DO NOT EDIT IT.
+class BaseApplocalization:
+    @staticmethod
+    def helloWorld() -> str:
+        raise NotImplementedError("Method must be implemented in subclass!")
+    @staticmethod
+    def bye(value: str) -> str:
+        raise NotImplementedError("Method must be implemented in subclass!")
+    @staticmethod
+    def numberOfUsers(number: int, values: str) -> str:
+        raise NotImplementedError("Method must be implemented in subclass!")
 
-import inspect
-
-class BaseAppLocalization:
-    def __init__(self):...
-    
-
-    @property
-    def helloWorld(self) -> str:
-        """        """
-        raise NotImplementedError(f"{self.__class__.__name__}.{inspect.currentframe().f_code.co_name} method must be implemented in subclass")
-    
-    
-    def bye(self, value: str = "World") -> str:
-        """Saying goodbye to someone\n
-        Bye World\n
-        Args:
-           value (str) Default value: World.
+class AppLocalizationEn(BaseApplocalization):
+    LANGUAGE_CODE: str = "en"
+    @staticmethod
+    def bye(value: str) -> str:
+        """Description: Saying goodbye to someone
+        Example: Bye World
         """
-        raise NotImplementedError(f"{self.__class__.__name__}.{inspect.currentframe().f_code.co_name} method must be implemented in subclass")
-    
-    
-    def numberOfUsers(self, values: str, number: int = 0) -> str:
-        """No description provided for #numberOfUsers.\n
-        Args:
-           number (int) Default value: 0.
-           values (str) Default value: .
-        """
-        raise NotImplementedError(f"{self.__class__.__name__}.{inspect.currentframe().f_code.co_name} method must be implemented in subclass")
-    
-class AppLocalizationEn(BaseAppLocalization):
-    def __init__(self):...
-    
-    @property
-    def helloWorld(self) -> str:
-        return f"Hello World"
-    
-    
-    def bye(self, value: str = "World") -> str:
         return f"Bye {value}"
-    
-    
-    def numberOfUsers(self, values: str, number: int = 0) -> str:
+    @staticmethod
+    def helloWorld() -> str:
+        """Description: 
+        Example: 
+        """
+        return f"Hello World"
+    @staticmethod
+    def numberOfUsers(number: int, values: str) -> str:
+        """Description: 
+        Example: 
+        """
         return f"Number of users: {number}"
-    
-class AppLocalizationRu(BaseAppLocalization):
-    def __init__(self):...
-    
-    @property
-    def helloWorld(self) -> str:
-        return f"Привет мир"
-    
-    
-    def bye(self, value: str = "Мир") -> str:
-        return f"Пока {value}"
-    
-    
-    def numberOfUsers(self, values: str, number: int = 0) -> str:
-        return f"Number of users: {number}"
-    
-class AppLocalization:
-    def __init__(self, locale: str = "en"):
-        self.__locale = locale
-    
-    @property
-    def default_locale(self) -> str:
-        return "en"
-    
-    @property
-    def current_locale(self) -> str:
-        return self.__locale
-    
-    @property
-    def locales(self) -> list[str]:
-        return [
-           "en",
-           "ru",
-        ]
-    
-    
-    def of(self) -> BaseAppLocalization:
-        
-        if self.__locale == "en":
-            return AppLocalizationEn()
-                
-        elif self.__locale == "ru":
-            return AppLocalizationRu()
-                
-        else:
-            raise ValueError(f"No {self.__locale} localization.")
 
+class AppLocalizationRu(BaseApplocalization):
+    LANGUAGE_CODE: str = "ru"
+    @staticmethod
+    def bye(value: str) -> str:
+        """Description: Saying goodbye to someone
+        Example: Bye World
+        """
+        return f"Bye {value}"
+    @staticmethod
+    def helloWorld() -> str:
+        """Description: 
+        Example: 
+        """
+        return f"Hello World"
+    @staticmethod
+    def numberOfUsers(number: int, values: str) -> str:
+        """Description: 
+        Example: 
+        """
+        return f"Number of users: {number}"
+
+class AppLocalization:
+    DEFAULT_LANGUAGE_CODE: str = "en"
+    current_language_code: str = "en"
+    language_codes: list[str] = ["en", "ru"]
+    languages: dict[str, BaseApplocalization] = {
+        "en": AppLocalizationEn(),
+        "ru": AppLocalizationRu(),
+    }
+
+    @staticmethod
+    def get() -> BaseApplocalization:
+        if AppLocalization.current_language_code in AppLocalization.languages:
+            return AppLocalization.languages[AppLocalization.current_language_code ]
+        else:
+            raise NotImplementedError(f"Such localization does not exist: AppLocalization.current_language_code")
 ```

@@ -1,3 +1,4 @@
 v1.0.0
 
 - Added file generation for python.
+- Publication of the first stable version.

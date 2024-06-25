@@ -15,7 +15,7 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -45,7 +45,7 @@ jobs:
         go-version: ['1.18', '1.19', '1.20', '1.21', '1.22']
     
     env:
-        BUILD_PATH: build/l10n
+      BUILD_PATH: build/l10n
 
     steps:
       - name: Write appinfo data to environment variables
@@ -72,21 +72,21 @@ jobs:
           sudo chmod +x .ci/get_changelog.sh
           ./.ci/get_changelog.sh ${{env.CHANGELOG_FILE}} ${{env.APP_VERSION}} > ${{ env.CHANGELOG_FILE }}.tmp
 
-      - name: Rename built program for Windows
+      - name: Rename built program
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
             mv ${{env.BUILD_PATH}}.exe ${{env.BUILD_PATH}}_windows.exe
             echo "BUILD_PATH=${{env.BUILD_PATH}}_windows.exe" >> $GITHUB_ENV
 
-      - name: Rename built program for Linux
+      - name: Rename built program
         if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
             mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_linux
             echo "BUILD_PATH=${{env.BUILD_PATH}}_linux" >> $GITHUB_ENV
 
-      - name: Rename built program for macOS
+      - name: Rename built program
         if: matrix.os == 'macos-latest'
         shell: bash
         run: |

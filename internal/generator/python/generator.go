@@ -27,8 +27,10 @@ type language struct {
 }
 
 type method struct {
-	Name       string
-	Parameters []parameter
+	Name        string
+	Parameters  []parameter
+	Description string
+	Example     string
 }
 
 type parameter struct {
@@ -55,6 +57,9 @@ class {{ .Name }}({{ $.BaseClassName }}):
     {{- range $methodName, $translation := .Translations }}
     @staticmethod
     def {{ $methodName }}({{ $methodParams := index $.MethodsByName $methodName }}{{ range $i, $param := $methodParams.Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}: {{ $param.Type }}{{ end }}) -> str:
+        """Description: {{ $methodParams.Description }}
+        Example: {{ $methodParams.Example }}
+        """
         return f"{{ $translation }}"
     {{- end }}
 {{- end }}
@@ -74,7 +79,7 @@ class {{ .ClassName }}:
         if {{ .ClassName }}.current_language_code in {{ .ClassName }}.languages:
             return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code ]
         else:
-            raise NotImplementedError(f"Such localization does not exist: { {{ .ClassName }}.current_language_code }")
+            raise NotImplementedError(f"Such localization does not exist: {{ .ClassName }}.current_language_code")
 `
 
 func (g *generatorPython) transform(className, defaultLanguageCode string, data *parser.Parser) {
@@ -97,7 +102,11 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 
 		for methodName, translateData := range loc.Data {
 			parameters := make([]parameter, 0)
+			description := ""
+			example := ""
 			if params := translateData.Params; params != nil {
+				description = params.Description
+				example = params.Example
 				for _, variable := range params.Variables {
 					// Determine parameter type based on variable type
 					var paramType string
@@ -121,8 +130,10 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 			// Check if method exists and create if it doesn't
 			if _, exists := methods[methodName]; !exists {
 				m := method{
-					Name:       methodName,
-					Parameters: parameters,
+					Name:        methodName,
+					Parameters:  parameters,
+					Description: description,
+					Example:     example,
 				}
 				methods[methodName] = m
 			}

@@ -1,4 +1,4 @@
-# L10n, library for application localization, based on json files.
+# L10n, an application localization program based on json files.
 
 ## Supported programming languages.
 
@@ -7,7 +7,7 @@
 | Python   |
 
 ## How to use
-### Downloading the library.
+### Downloading the program.
 ```bash
 wget https://github.com/A1ex3/l10n/releases/download/{version}/{file}
 ```

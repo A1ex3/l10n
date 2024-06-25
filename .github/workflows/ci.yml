@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  CHANGELOG_FILE: changelog.txt
+  APPINFO_FILE: appinfo
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        go-version: ['1.18', '1.19', '1.20', '1.21', '1.22']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Run tests
+        shell: bash
+        run: make test
+
+  release:
+    name: Create release
+    needs: test
+    if: ${{ needs.test.result == 'success' && startsWith(github.ref, 'refs/heads/v') }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        go-version: ['1.18', '1.19', '1.20', '1.21', '1.22']
+    
+    env:
+        BUILD_PATH: build/l10n
+
+    steps:
+      - name: Write appinfo data to environment variables
+        shell: bash
+        run: |
+            source ${{env.APPINFO_FILE}}
+            echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Build
+        shell: bash
+        run: make build
+
+      - name: Get Change log
+        shell: bash
+        run: |
+          sudo chmod +x .ci/get_changelog.sh
+          ./.ci/get_changelog.sh ${{env.CHANGELOG_FILE}} ${{env.APP_VERSION}} > ${{ env.CHANGELOG_FILE }}.tmp
+
+      - name: Rename built program for Windows
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+            mv ${{env.BUILD_PATH}}.exe ${{env.BUILD_PATH}}_windows.exe
+            echo "BUILD_PATH=${{env.BUILD_PATH}}_windows.exe" >> $GITHUB_ENV
+
+      - name: Rename built program for Linux
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+            mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_linux
+            echo "BUILD_PATH=${{env.BUILD_PATH}}_linux" >> $GITHUB_ENV
+
+      - name: Rename built program for macOS
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+            mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_macos
+            echo "BUILD_PATH=${{env.BUILD_PATH}}_macos" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+            body_path: ${{ env.CHANGELOG_FILE }}.tmp
+            files: ${{env.BUILD_PATH}}
+            tag_name: ${{env.APP_VERSION}}
+        env:
+            GITHUB_TOKEN: ${{ secrets.ACTIONS }}

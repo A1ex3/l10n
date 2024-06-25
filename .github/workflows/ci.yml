@@ -72,6 +72,7 @@ jobs:
         run: make build
 
       - name: Get Change log
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         shell: bash
         run: |
           sudo chmod +x .ci/get_changelog.sh
@@ -98,7 +99,17 @@ jobs:
             mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_macos
             echo "BUILD_PATH=${{env.BUILD_PATH}}_macos" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+            files: ${{env.BUILD_PATH}}
+            tag_name: ${{env.APP_VERSION}}
+        env:
+            GITHUB_TOKEN: ${{ secrets.ACTIONS }}
+
+      - name: Create GitHub Release (Linux & macOS)
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
         uses: softprops/action-gh-release@v2
         with:
             body_path: ${{ env.CHANGELOG_FILE }}.tmp

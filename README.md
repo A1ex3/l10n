@@ -133,57 +133,50 @@ or
 ### Result `app_localization.py`.
 ```python
 class BaseApplocalization:
-    @staticmethod
-    def helloWorld() -> str:
+    def numberOfUsers(self, number: int, values: str) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
-    @staticmethod
-    def bye(value: str) -> str:
+    def helloWorld(self, ) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
-    @staticmethod
-    def numberOfUsers(number: int, values: str) -> str:
+    def bye(self, value: str) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
 
 class AppLocalizationEn(BaseApplocalization):
-    LANGUAGE_CODE: str = "en"
-    @staticmethod
-    def bye(value: str) -> str:
+    def __init__(self) -> None:
+        self.LANGUAGE_CODE: str = "en"
+    def bye(self, value: str) -> str:
         """Description: Saying goodbye to someone
         Example: Bye World
         """
         return f"Bye {value}"
-    @staticmethod
-    def helloWorld() -> str:
+    def helloWorld(self, ) -> str:
         """Description: 
         Example: 
         """
         return f"Hello World"
-    @staticmethod
-    def numberOfUsers(number: int, values: str) -> str:
+    def numberOfUsers(self, number: int, values: str) -> str:
         """Description: 
         Example: 
         """
         return f"Number of users: {number}"
 
 class AppLocalizationRu(BaseApplocalization):
-    LANGUAGE_CODE: str = "ru"
-    @staticmethod
-    def bye(value: str) -> str:
+    def __init__(self) -> None:
+        self.LANGUAGE_CODE: str = "ru"
+    def bye(self, value: str) -> str:
         """Description: Saying goodbye to someone
         Example: Bye World
         """
         return f"Bye {value}"
-    @staticmethod
-    def helloWorld() -> str:
+    def helloWorld(self, ) -> str:
         """Description: 
         Example: 
         """
-        return f"Hello World"
-    @staticmethod
-    def numberOfUsers(number: int, values: str) -> str:
+        return f"Привет мир"
+    def numberOfUsers(self, number: int, values: str) -> str:
         """Description: 
         Example: 
         """
-        return f"Number of users: {number}"
+        return f"Количество пользователей: {number}"
 
 class AppLocalization:
     DEFAULT_LANGUAGE_CODE: str = "en"

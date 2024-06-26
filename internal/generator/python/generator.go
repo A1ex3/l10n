@@ -44,19 +44,17 @@ type generatorPython struct {
 
 const localizationTemplate = `class {{.BaseClassName}}:
     {{- range .Methods }}
-    @staticmethod
-    def {{ .Name }}({{ range $i, $param := .Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}: {{ $param.Type }}{{ end }}) -> str:
+    def {{ .Name }}(self, {{ range $i, $param := .Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}: {{ $param.Type }}{{ end }}) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
     {{- end }}
 
 {{- range .Languages }}
 
 class {{ .Name }}({{ $.BaseClassName }}):
-    LANGUAGE_CODE: str = "{{ .Code }}"
-
+    def __init__(self) -> None:
+        self.LANGUAGE_CODE: str = "{{ .Code }}"
     {{- range $methodName, $translation := .Translations }}
-    @staticmethod
-    def {{ $methodName }}({{ $methodParams := index $.MethodsByName $methodName }}{{ range $i, $param := $methodParams.Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}: {{ $param.Type }}{{ end }}) -> str:
+    def {{ $methodName }}(self, {{ $methodParams := index $.MethodsByName $methodName }}{{ range $i, $param := $methodParams.Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}: {{ $param.Type }}{{ end }}) -> str:
         """Description: {{ $methodParams.Description }}
         Example: {{ $methodParams.Example }}
         """
@@ -77,7 +75,7 @@ class {{ .ClassName }}:
     @staticmethod
     def get() -> {{ .BaseClassName }}:
         if {{ .ClassName }}.current_language_code in {{ .ClassName }}.languages:
-            return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code ]
+            return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code]
         else:
             raise NotImplementedError(f"Such localization does not exist: {{ .ClassName }}.current_language_code")
 `

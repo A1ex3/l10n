@@ -2,7 +2,7 @@ package generatorpython
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 
 	"github.com/a1ex3/l10n/internal/parser"
 	"golang.org/x/text/cases"

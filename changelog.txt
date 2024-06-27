@@ -1,3 +1,8 @@
+v1.0.1
+
+- Changed Python code generation, removed unnecessary static methods.
+- Corrected documentation.
+
 v1.0.0
 
 - Added file generation for python.

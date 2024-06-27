@@ -2,6 +2,7 @@ package generatorpython
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 
 	"github.com/a1ex3/l10n/internal/parser"
@@ -80,6 +81,19 @@ class {{ .ClassName }}:
             raise NotImplementedError(f"Such localization does not exist: {{ .ClassName }}.current_language_code")
 `
 
+func capitalizeAfterHyphen(input string) string {
+	parts := strings.Split(input, "-")
+	var capitalizedParts []string
+
+	for _, part := range parts {
+		if part != "" {
+			capitalized := cases.Title(lang.English).String(part)
+			capitalizedParts = append(capitalizedParts, capitalized)
+		}
+	}
+	return strings.Join(capitalizedParts, "")
+}
+
 func (g *generatorPython) transform(className, defaultLanguageCode string, data *parser.Parser) {
 	const baseClassNamePrefix string = "Base"
 
@@ -142,7 +156,7 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 			translations[key] = translateData.Text
 		}
 		lang := language{
-			Name:         className + cases.Title(lang.English).String(loc.LanguageCode),
+			Name:         className + capitalizeAfterHyphen(cases.Title(lang.English).String(loc.LanguageCode)),
 			Code:         loc.LanguageCode,
 			Translations: translations,
 		}

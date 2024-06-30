@@ -181,7 +181,6 @@ class AppLocalizationRu(BaseApplocalization):
 class AppLocalization:
     DEFAULT_LANGUAGE_CODE: str = "en"
     current_language_code: str = "en"
-    language_codes: list[str] = ["en", "ru"]
     languages: dict[str, BaseApplocalization] = {
         "en": AppLocalizationEn(),
         "ru": AppLocalizationRu(),

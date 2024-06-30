@@ -16,7 +16,6 @@ type localizationData struct {
 	BaseClassName   string
 	DefaultLangCode string
 	CurrentLangCode string
-	LanguageCodes   []string
 	Methods         []method
 	MethodsByName   map[string]method
 }
@@ -66,7 +65,6 @@ class {{ .Name }}({{ $.BaseClassName }}):
 class {{ .ClassName }}:
     DEFAULT_LANGUAGE_CODE: str = "{{ .DefaultLangCode }}"
     current_language_code: str = "{{ .CurrentLangCode }}"
-    language_codes: list[str] = [{{ range $i, $code := .LanguageCodes }}{{ if $i }}, {{ end }}"{{ $code }}"{{ end }}]
     languages: dict[str, {{ .BaseClassName }}] = {
         {{- range $key, $lang := .Languages }}
         "{{ $lang.Code }}": {{ $lang.Name }}(),
@@ -105,13 +103,10 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 		MethodsByName:   make(map[string]method),
 	}
 
-	languageCodes := make([]string, 0)
 	languages := make([]language, 0)
 	methods := make(map[string]method)
 
 	for _, loc := range data.ArrayOfLocalizations {
-		languageCodes = append(languageCodes, loc.LanguageCode)
-
 		for methodName, translateData := range loc.Data {
 			parameters := make([]parameter, 0)
 			description := ""
@@ -163,7 +158,6 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 		languages = append(languages, lang)
 	}
 
-	ld.LanguageCodes = languageCodes
 	ld.Languages = languages
 
 	for _, m := range methods {

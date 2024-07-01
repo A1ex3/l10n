@@ -90,6 +90,8 @@ func main() {
 			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
 				log.Fatalln(errWriteToFile)
 			}
+		} else {
+			log.Fatalf("This programming language is not supported!")
 		}
 	}
 }

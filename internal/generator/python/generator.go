@@ -73,10 +73,7 @@ class {{ .ClassName }}:
 
     @staticmethod
     def get() -> {{ .BaseClassName }}:
-        if {{ .ClassName }}.current_language_code in {{ .ClassName }}.languages:
-            return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code]
-        else:
-            raise NotImplementedError(f"Such localization does not exist: {{ .ClassName }}.current_language_code")
+        return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code]
 `
 
 func capitalizeAfterHyphen(input string) string {

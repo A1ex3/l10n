@@ -134,16 +134,16 @@ or
 ### Result `app_localization.py`.
 ```python
 class BaseApplocalization:
-    def numberOfUsers(self, number: int, values: str) -> str:
-        raise NotImplementedError("Method must be implemented in subclass!")
     def helloWorld(self, ) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
     def bye(self, value: str) -> str:
         raise NotImplementedError("Method must be implemented in subclass!")
+    def numberOfUsers(self, number: int, values: str) -> str:
+        raise NotImplementedError("Method must be implemented in subclass!")
 
-class AppLocalizationEn(BaseApplocalization):
+class AppLocalizationEnUs(BaseApplocalization):
     def __init__(self) -> None:
-        self.LANGUAGE_CODE: str = "en"
+        self.LANGUAGE_CODE: str = "en-US"
     def bye(self, value: str) -> str:
         """Description: Saying goodbye to someone
         Example: Bye World
@@ -180,19 +180,16 @@ class AppLocalizationRu(BaseApplocalization):
         return f"Количество пользователей: {number}"
 
 class AppLocalization:
-    DEFAULT_LANGUAGE_CODE: str = "en"
-    current_language_code: str = "en"
+    DEFAULT_LANGUAGE_CODE: str = "en-US"
+    current_language_code: str = "en-US"
     languages: dict[str, BaseApplocalization] = {
-        "en": AppLocalizationEn(),
+        "en-US": AppLocalizationEnUs(),
         "ru": AppLocalizationRu(),
     }
 
     @staticmethod
     def get() -> BaseApplocalization:
-        if AppLocalization.current_language_code in AppLocalization.languages:
-            return AppLocalization.languages[AppLocalization.current_language_code ]
-        else:
-            raise NotImplementedError(f"Such localization does not exist: AppLocalization.current_language_code")
+        return AppLocalization.languages[AppLocalization.current_language_code]
 ```
 
 ### Result `AppLocalization.java`.

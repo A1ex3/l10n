@@ -52,6 +52,10 @@ import java.util.Map;
 
 interface {{.BaseClassName}} {
     {{- range .Methods }}
+    /**
+     * Description: <b> {{ .Description }} </b>
+     * Example: <b> {{ .Example }} </b>
+     */
     String {{ .Name }}({{ range $i, $param := .Parameters }}{{ if $i }}, {{ end }}{{ $param.Type }} {{ $param.Name }}{{ end }});
     {{- end }}
 }

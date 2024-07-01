@@ -51,16 +51,6 @@ func (c *Config) argsValidator(
 	if programmingLanguage == "" {
 		return errors.New("programming_language cannot be empty")
 	}
-	validProgrammingLanguage := false
-	for _, lang := range c.availableProgrammingLanguages {
-		if lang == programmingLanguage {
-			validProgrammingLanguage = true
-			break
-		}
-	}
-	if !validProgrammingLanguage {
-		return errors.New("invalid programming_language")
-	}
 
 	if className == "" {
 		return errors.New("class_name cannot be empty")

@@ -4,8 +4,11 @@ import (
 	"flag"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/a1ex3/l10n/internal/config"
+	generatorjava "github.com/a1ex3/l10n/internal/generator/java"
 	generatorpython "github.com/a1ex3/l10n/internal/generator/python"
 	"github.com/a1ex3/l10n/internal/parser"
 )
@@ -13,6 +16,7 @@ import (
 var (
 	availableProgrammingLanguages = []string{
 		"Python",
+		"Java",
 	}
 )
 
@@ -57,16 +61,35 @@ func main() {
 		log.Fatalln(errPrs)
 	}
 
-	switch cfg := cfg.GetConfig(); cfg.ProgrammingLanguage {
-	case availableProgrammingLanguages[0]: // Python
-		gen, errGen := generatorpython.NewGeneratorPython(cfg.ClassName, cfg.Template, prs).Get()
+	conf := cfg.GetConfig()
+	if conf.ProgrammingLanguage == availableProgrammingLanguages[0] { // Python
+		gen, errGen := generatorpython.NewGeneratorPython(conf.ClassName, conf.Template, prs).Get()
 		if errGen != nil {
 			log.Fatalln(errGen)
 		}
-		if errWriteToFile := writeToFile(cfg.OutputLocalizationFile, gen); errWriteToFile != nil {
+		if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
 			log.Fatalln(errWriteToFile)
 		}
-	default:
-		log.Fatalf("This programming language is not supported!")
+	} else if regexp.MustCompile(`^([A-Za-z0-9]+\.)*[A-Za-z0-9]+$`).MatchString(conf.ProgrammingLanguage) { // Used only if you need to specify a package when generating a file.
+		packageName := ""
+		programmingLang := ""
+
+		if index := strings.Index(conf.ProgrammingLanguage, "."); index > 0 {
+			programmingLang = conf.ProgrammingLanguage[:index]
+			packageName = conf.ProgrammingLanguage[index+1:]
+		} else {
+			programmingLang = conf.ProgrammingLanguage
+			packageName = "l10n"
+		}
+
+		if programmingLang == availableProgrammingLanguages[1] { // Java
+			gen, errGen := generatorjava.NewGeneratorJava(conf.ClassName, packageName, conf.Template, prs).Get()
+			if errGen != nil {
+				log.Fatalln(errGen)
+			}
+			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
+				log.Fatalln(errWriteToFile)
+			}
+		}
 	}
 }

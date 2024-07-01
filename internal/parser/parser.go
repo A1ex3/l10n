@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -66,6 +67,9 @@ func (p *Parser) readLocales(pathToTranslates string) (map[string]map[string]int
 		filename := file.Name()
 		if !strings.HasPrefix(filename, "l10n_") || !strings.HasSuffix(filename, ".json") {
 			continue
+		}
+		if !regexp.MustCompile(`^l10n_[a-z]+\.json$`).MatchString(filename) && !regexp.MustCompile(`^l10n_[a-z]+-[A-Z]+\.json$`).MatchString(filename) {
+			return nil, fmt.Errorf("file name: %s, does not match current templates: \"l10n_<lang code>.json\", \"l10n_<lang code>-<REGION CODE>.json\"", filename)
 		}
 		filePath := filepath.Join(pathToTranslates, filename)
 		data, err := os.ReadFile(filePath)

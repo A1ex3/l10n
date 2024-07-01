@@ -194,3 +194,93 @@ class AppLocalization:
         else:
             raise NotImplementedError(f"Such localization does not exist: AppLocalization.current_language_code")
 ```
+
+### Result `AppLocalization.java`.
+```java
+package l10n;
+
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+interface BaseApplocalization {
+    /**
+     * Description: <b>  </b>
+     * Example: <b>  </b>
+     */
+    String numberOfUsers(Integer number, String values);
+    /**
+     * Description: <b> Saying goodbye to someone </b>
+     * Example: <b> Bye World </b>
+     */
+    String bye(String value);
+    /**
+     * Description: <b>  </b>
+     * Example: <b>  </b>
+     */
+    String helloWorld();
+}
+
+final class AppLocalizationRu implements BaseApplocalization {
+    public final String LANGUAGE_CODE = "ru";
+    @Override
+    public String bye(String value) {
+        return MessageFormat.format("Bye {0}", value);
+    }
+    @Override
+    public String helloWorld() {
+        return "Привет мир";
+    }
+    @Override
+    public String numberOfUsers(Integer number, String values) {
+        return MessageFormat.format("Количество пользователей: {0}", number, values);
+    }
+}
+
+final class AppLocalizationEnUs implements BaseApplocalization {
+    public final String LANGUAGE_CODE = "en-US";
+    @Override
+    public String bye(String value) {
+        return MessageFormat.format("Bye {0}", value);
+    }
+    @Override
+    public String helloWorld() {
+        return "Hello World";
+    }
+    @Override
+    public String numberOfUsers(Integer number, String values) {
+        return MessageFormat.format("Number of users: {0}", number, values);
+    }
+}
+
+public final class AppLocalization {
+    public static final String DEFAULT_LANGUAGE_CODE = "en-US";
+    private static String currentLanguageCode = "en-US";
+    public static final Map<String, BaseApplocalization> languages = new HashMap<>();
+
+    static {
+        languages.put("ru", new AppLocalizationRu());
+        languages.put("en-US", new AppLocalizationEnUs());
+    }
+
+    public static BaseApplocalization get() {
+        return languages.get(currentLanguageCode);
+    }
+
+    public static boolean setCurrentLanguageCode(String languageCode) {
+        if (languages.containsKey(languageCode)) {
+            currentLanguageCode = languageCode;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static String getCurrentLanguageCode() {
+        return currentLanguageCode;
+    }
+}
+```
+
+# TODO
+- [ ] Add generation of class methods with default parameters.

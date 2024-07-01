@@ -5,6 +5,7 @@
 | Language |
 |----------|
 | Python   |
+| Java     |
 
 ## How to use
 ### Downloading the program.
@@ -13,7 +14,7 @@ wget https://github.com/A1ex3/l10n/releases/download/{version}/{file}
 ```
 #### Example.
 ```bash
-wget https://github.com/A1ex3/l10n/releases/download/1.0.0/l10n_windows.exe
+wget https://github.com/A1ex3/l10n/releases/download/v1.0.0/l10n_windows.exe
 ```
 
 ### Creating a configuration file.
@@ -29,11 +30,11 @@ programming_language: Python
 
 | Parameter | Description |
 |-----------|-------------|
-| dir | Path to the directory with translations where l10n_language.json files are stored. |
+| dir | Path to the directory with translations where l10n_[language code]-[optional country code].json files are stored. |
 | output_localization_file | The path where the file will be generated, you must first create a directory where the file will be saved. |
 | template | Default translation where the translation status will always be 100%, no need to specify the full path to the file, just the name. |
 | class_name | The name of the class whose name will be assigned to the main class. |
-| programming_language | Programming language for which the code will be generated. |
+| programming_language | Programming language for which the code will be generated. In programming languages where a package name is required, such as `Java`, `Kotlin`, etc. It can be specified in the value for `programming_language`. For example `Java.dev.example`, then the package name will be `dev.example`, the default package name is `l10n`. |
 
 ### Creating a translation file.
 #### Example.
@@ -122,13 +123,13 @@ or
 .\build\l10n.exe -DIR "app/translates/" -TEMPLATE "en" -OUTPUT_LOCALIZATION_FILE "app/app_localization.py" -PROGRAMMING_LANGUAGE "Python" -CLASS_NAME "AppLocalization"
 ```
 
-| Key | args |
-|-----|-------------|
-| -DIR | |
-| -TEMPLATE | |
-| -OUTPUT_LOCALIZATION_FILE | |
-| -PROGRAMMING_LANGUAGE | |
-| -CLASS_NAME | |
+| Key |
+|-----|
+| -DIR |
+| -TEMPLATE |
+| -OUTPUT_LOCALIZATION_FILE |
+| -PROGRAMMING_LANGUAGE |
+| -CLASS_NAME |
 
 ### Result `app_localization.py`.
 ```python

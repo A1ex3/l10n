@@ -1,3 +1,7 @@
+v1.2.0
+
+- Added programming languages: `Cpp`, `Kotlin`, `JavaScript`, `TypeScript`.
+
 v1.1.0
 
 - `Python` code generation has been updated and improved.

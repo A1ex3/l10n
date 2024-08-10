@@ -8,8 +8,12 @@ import (
 	"strings"
 
 	"github.com/a1ex3/l10n/internal/config"
+	generatorcpp "github.com/a1ex3/l10n/internal/generator/cpp"
 	generatorjava "github.com/a1ex3/l10n/internal/generator/java"
+	generatorjs "github.com/a1ex3/l10n/internal/generator/javascript"
+	generatorkotlin "github.com/a1ex3/l10n/internal/generator/kotlin"
 	generatorpython "github.com/a1ex3/l10n/internal/generator/python"
+	generatorts "github.com/a1ex3/l10n/internal/generator/typescript"
 	"github.com/a1ex3/l10n/internal/parser"
 )
 
@@ -17,6 +21,10 @@ var (
 	availableProgrammingLanguages = []string{
 		"Python",
 		"Java",
+		"Cpp",
+		"Kotlin",
+		"TypeScript",
+		"JavaScript",
 	}
 )
 
@@ -84,6 +92,38 @@ func main() {
 
 		if programmingLang == availableProgrammingLanguages[1] { // Java
 			gen, errGen := generatorjava.NewGeneratorJava(conf.ClassName, packageName, conf.Template, prs).Get()
+			if errGen != nil {
+				log.Fatalln(errGen)
+			}
+			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
+				log.Fatalln(errWriteToFile)
+			}
+		} else if programmingLang == availableProgrammingLanguages[2] {
+			gen, errGen := generatorcpp.NewGeneratorCpp(conf.ClassName, packageName, conf.Template, prs).Get()
+			if errGen != nil {
+				log.Fatalln(errGen)
+			}
+			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
+				log.Fatalln(errWriteToFile)
+			}
+		} else if programmingLang == availableProgrammingLanguages[3] {
+			gen, errGen := generatorkotlin.NewGeneratorKotlin(conf.ClassName, packageName, conf.Template, prs).Get()
+			if errGen != nil {
+				log.Fatalln(errGen)
+			}
+			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
+				log.Fatalln(errWriteToFile)
+			}
+		} else if programmingLang == availableProgrammingLanguages[4] {
+			gen, errGen := generatorts.NewGeneratorTS(conf.ClassName, packageName, conf.Template, prs).Get()
+			if errGen != nil {
+				log.Fatalln(errGen)
+			}
+			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
+				log.Fatalln(errWriteToFile)
+			}
+		} else if programmingLang == availableProgrammingLanguages[5] {
+			gen, errGen := generatorjs.NewGeneratorJS(conf.ClassName, packageName, conf.Template, prs).Get()
 			if errGen != nil {
 				log.Fatalln(errGen)
 			}

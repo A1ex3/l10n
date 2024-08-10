@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type entityConfig struct {
+type EntityConfig struct {
 	Dir                    string `yaml:"dir"`
 	Template               string `yaml:"template"`
 	OutputLocalizationFile string `yaml:"output_localization_file"`
@@ -17,7 +17,7 @@ type entityConfig struct {
 
 type Config struct {
 	availableProgrammingLanguages []string
-	entityConfig                  *entityConfig
+	EntityConfig                  *EntityConfig
 }
 
 func readFile(filepath string) ([]byte, error) {
@@ -70,7 +70,7 @@ func (c *Config) FromArgs(
 		return err
 	}
 
-	c.entityConfig = &entityConfig{
+	c.EntityConfig = &EntityConfig{
 		Dir:                    dir,
 		Template:               template,
 		OutputLocalizationFile: outputLocalizationFile,
@@ -87,28 +87,28 @@ func (c *Config) FromFileYaml(filepath string) error {
 		return errDataFromFile
 	}
 
-	cfg := &entityConfig{}
+	cfg := &EntityConfig{}
 	err := yaml.Unmarshal([]byte(dataFromFile), cfg)
 	if err != nil {
 		return err
 	}
 
-	c.entityConfig = cfg
+	c.EntityConfig = cfg
 
-	if err := c.argsValidator(c.entityConfig.Dir, c.entityConfig.Template, c.entityConfig.OutputLocalizationFile, c.entityConfig.ProgrammingLanguage, c.entityConfig.ClassName); err != nil {
+	if err := c.argsValidator(c.EntityConfig.Dir, c.EntityConfig.Template, c.EntityConfig.OutputLocalizationFile, c.EntityConfig.ProgrammingLanguage, c.EntityConfig.ClassName); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *Config) GetConfig() *entityConfig {
-	return c.entityConfig
+func (c *Config) GetConfig() *EntityConfig {
+	return c.EntityConfig
 }
 
 func NewConfig(availableProgrammingLanguages []string) *Config {
 	return &Config{
 		availableProgrammingLanguages: availableProgrammingLanguages,
-		entityConfig:                  nil,
+		EntityConfig:                  nil,
 	}
 }

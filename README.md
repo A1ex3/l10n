@@ -2,10 +2,14 @@
 
 ## Supported programming languages.
 
-| Language |
-|----------|
-| Python   |
-| Java     |
+| Language   |
+|------------|
+| Python     |
+| Java       |
+| Kotlin     |
+| Cpp        |
+| JavaScript |
+| TypeScript |
 
 ## How to use
 ### Downloading the program.

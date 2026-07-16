@@ -1,3 +1,7 @@
+v1.2.1
+
+- Fixed a bug that caused special characters (such as escaped quotes) and brackets to be mishandled during code generation, resulting in invalid syntax in the generated code. Issue: https://github.com/A1ex3/l10n/issues/2
+
 v1.2.0
 
 - Added programming languages: `Cpp`, `Kotlin`, `JavaScript`, `TypeScript`.

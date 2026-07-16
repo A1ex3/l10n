@@ -16,7 +16,7 @@ on:
 
 env:
   CHANGELOG_FILE: changelog.txt
-  APPINFO_FILE: appinfo
+  APP_INFO_FILE: appinfo
 
 jobs:
   test:
@@ -59,8 +59,8 @@ jobs:
       - name: Write appinfo data to environment variables
         shell: bash
         run: |
-            source ${{env.APPINFO_FILE}}
-            echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+            source ${{env.APP_INFO_FILE}}
+            echo "L10N_INFO_VERSION=${L10N_INFO_VERSION}" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -76,7 +76,7 @@ jobs:
         shell: bash
         run: |
           sudo chmod +x .ci/get_changelog.sh
-          ./.ci/get_changelog.sh ${{env.CHANGELOG_FILE}} ${{env.APP_VERSION}} > ${{ env.CHANGELOG_FILE }}.tmp
+          ./.ci/get_changelog.sh ${{env.CHANGELOG_FILE}} ${{env.L10N_INFO_VERSION}} > ${{ env.CHANGELOG_FILE }}.tmp
 
       - name: Rename built program
         if: matrix.os == 'windows-latest'
@@ -104,7 +104,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
             files: ${{env.BUILD_PATH}}
-            tag_name: ${{env.APP_VERSION}}
+            tag_name: ${{env.L10N_INFO_VERSION}}
         env:
             GITHUB_TOKEN: ${{ secrets.ACTIONS }}
 
@@ -114,6 +114,6 @@ jobs:
         with:
             body_path: ${{ env.CHANGELOG_FILE }}.tmp
             files: ${{env.BUILD_PATH}}
-            tag_name: ${{env.APP_VERSION}}
+            tag_name: ${{env.L10N_INFO_VERSION}}
         env:
             GITHUB_TOKEN: ${{ secrets.ACTIONS }}

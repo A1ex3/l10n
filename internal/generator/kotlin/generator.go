@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/a1ex3/l10n/internal/generator/common"
 	"github.com/a1ex3/l10n/internal/parser"
 	"golang.org/x/text/cases"
 	lang "golang.org/x/text/language"
@@ -65,7 +66,7 @@ class {{ .Name }} : {{ $.BaseClassName }} {
         {{- if $methodParams.Parameters }}
         return "{{ formatTranslation $translation $methodParams.Parameters }}".format({{ range $i, $param := $methodParams.Parameters }}{{ if $i }}, {{ end }}{{ $param.Name }}{{ end }})
         {{- else }}
-        return "{{ $translation }}"
+        return "{{ escapeSymbolsString $translation }}"
         {{- end }}
     }
     {{- end }}
@@ -196,6 +197,7 @@ func (g *generatorKotlin) Get() (string, error) {
 		"formatTranslation": func(translation string, parameters []parameter) string {
 			return formatTranslation(translation, parameters)
 		},
+		"escapeSymbolsString": common.EscapeSymbolsString,
 	}).Parse(localizationTemplate)).Execute(&tpl, g.localeData)
 	if err != nil {
 		return "", err

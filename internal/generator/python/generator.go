@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/a1ex3/l10n/internal/generator/common"
 	"github.com/a1ex3/l10n/internal/parser"
 	"golang.org/x/text/cases"
 	lang "golang.org/x/text/language"
@@ -58,7 +59,7 @@ class {{ .Name }}({{ $.BaseClassName }}):
         """Description: {{ $methodParams.Description }}
         Example: {{ $methodParams.Example }}
         """
-        return f"{{ $translation }}"
+        return f"{{ escapeSymbolsString $translation }}"
     {{- end }}
 {{- end }}
 
@@ -167,7 +168,9 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 
 func (g *generatorPython) Get() (string, error) {
 	var tpl bytes.Buffer
-	err := template.Must(template.New("localization").Parse(localizationTemplate)).Execute(&tpl, g.localeData)
+	err := template.Must(template.New("localization").Funcs(template.FuncMap{
+		"escapeSymbolsString": common.EscapeSymbolsString,
+	}).Parse(localizationTemplate)).Execute(&tpl, g.localeData)
 	if err != nil {
 		return "", err
 	}

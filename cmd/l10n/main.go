@@ -4,16 +4,10 @@ import (
 	"flag"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/a1ex3/l10n/internal/config"
-	generatorcpp "github.com/a1ex3/l10n/internal/generator/cpp"
-	generatorjava "github.com/a1ex3/l10n/internal/generator/java"
-	generatorjs "github.com/a1ex3/l10n/internal/generator/javascript"
-	generatorkotlin "github.com/a1ex3/l10n/internal/generator/kotlin"
-	generatorpython "github.com/a1ex3/l10n/internal/generator/python"
-	generatorts "github.com/a1ex3/l10n/internal/generator/typescript"
+	"github.com/a1ex3/l10n/internal/generator"
 	"github.com/a1ex3/l10n/internal/parser"
 )
 
@@ -54,7 +48,6 @@ func main() {
 			log.Fatalln(err)
 		}
 	} else {
-
 		if *dirFlag == "" || *templateFlag == "" || *outputLocalizationFlag == "" || *programmingLanguageFlag == "" || *classNameFlag == "" {
 			log.Fatalln("enter the -h parameter, to get details about the startup parameters")
 		}
@@ -70,68 +63,23 @@ func main() {
 	}
 
 	conf := cfg.GetConfig()
-	if conf.ProgrammingLanguage == availableProgrammingLanguages[0] { // Python
-		gen, errGen := generatorpython.NewGeneratorPython(conf.ClassName, conf.Template, prs).Get()
-		if errGen != nil {
-			log.Fatalln(errGen)
-		}
-		if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-			log.Fatalln(errWriteToFile)
-		}
-	} else if regexp.MustCompile(`^([A-Za-z0-9]+\.)*[A-Za-z0-9]+$`).MatchString(conf.ProgrammingLanguage) { // Used only if you need to specify a package when generating a file.
-		packageName := ""
-		programmingLang := ""
+	packageName := "l10n"
+	programmingLang := strings.ToLower(conf.ProgrammingLanguage)
+	if index := strings.Index(conf.ProgrammingLanguage, "."); index > 0 {
+		packageName = conf.ProgrammingLanguage[index+1:]
+		programmingLang = strings.ToLower(conf.ProgrammingLanguage[:index])
+	}
 
-		if index := strings.Index(conf.ProgrammingLanguage, "."); index > 0 {
-			programmingLang = conf.ProgrammingLanguage[:index]
-			packageName = conf.ProgrammingLanguage[index+1:]
-		} else {
-			programmingLang = conf.ProgrammingLanguage
-			packageName = "l10n"
-		}
+	gen, errGen := generator.NewGenerator(programmingLang, conf.ClassName, conf.Template, packageName, prs)
+	if errGen != nil {
+		log.Fatalln(errGen)
+	}
 
-		if programmingLang == availableProgrammingLanguages[1] { // Java
-			gen, errGen := generatorjava.NewGeneratorJava(conf.ClassName, packageName, conf.Template, prs).Get()
-			if errGen != nil {
-				log.Fatalln(errGen)
-			}
-			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-				log.Fatalln(errWriteToFile)
-			}
-		} else if programmingLang == availableProgrammingLanguages[2] {
-			gen, errGen := generatorcpp.NewGeneratorCpp(conf.ClassName, packageName, conf.Template, prs).Get()
-			if errGen != nil {
-				log.Fatalln(errGen)
-			}
-			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-				log.Fatalln(errWriteToFile)
-			}
-		} else if programmingLang == availableProgrammingLanguages[3] {
-			gen, errGen := generatorkotlin.NewGeneratorKotlin(conf.ClassName, packageName, conf.Template, prs).Get()
-			if errGen != nil {
-				log.Fatalln(errGen)
-			}
-			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-				log.Fatalln(errWriteToFile)
-			}
-		} else if programmingLang == availableProgrammingLanguages[4] {
-			gen, errGen := generatorts.NewGeneratorTS(conf.ClassName, packageName, conf.Template, prs).Get()
-			if errGen != nil {
-				log.Fatalln(errGen)
-			}
-			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-				log.Fatalln(errWriteToFile)
-			}
-		} else if programmingLang == availableProgrammingLanguages[5] {
-			gen, errGen := generatorjs.NewGeneratorJS(conf.ClassName, packageName, conf.Template, prs).Get()
-			if errGen != nil {
-				log.Fatalln(errGen)
-			}
-			if errWriteToFile := writeToFile(conf.OutputLocalizationFile, gen); errWriteToFile != nil {
-				log.Fatalln(errWriteToFile)
-			}
-		} else {
-			log.Fatalf("This programming language is not supported!")
-		}
+	code, errCode := gen.Get()
+	if errCode != nil {
+		log.Fatalln(errCode)
+	}
+	if errWriteToFile := writeToFile(conf.OutputLocalizationFile, code); errWriteToFile != nil {
+		log.Fatalln(errWriteToFile)
 	}
 }

@@ -25,7 +25,6 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        go-version: ['1.20', '1.21']
 
     steps:
       - name: Checkout code
@@ -34,7 +33,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: '1.26'
 
       - name: Run tests
         shell: bash
@@ -65,7 +64,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.26'
 
       - name: Build
         shell: bash
@@ -101,19 +100,17 @@ jobs:
 
       - name: Create GitHub Release (Windows)
         if: matrix.os == 'windows-latest'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
             files: ${{env.BUILD_PATH}}
             tag_name: ${{env.L10N_INFO_VERSION}}
-        env:
-            GITHUB_TOKEN: ${{ secrets.ACTIONS }}
+            token: ${{ secrets.ACTIONS }}
 
       - name: Create GitHub Release (Linux & macOS)
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
             body_path: ${{ env.CHANGELOG_FILE }}.tmp
             files: ${{env.BUILD_PATH}}
             tag_name: ${{env.L10N_INFO_VERSION}}
-        env:
-            GITHUB_TOKEN: ${{ secrets.ACTIONS }}
+            token: ${{ secrets.ACTIONS }}

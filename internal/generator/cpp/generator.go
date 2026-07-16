@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/a1ex3/l10n/internal/generator/common"
 	"github.com/a1ex3/l10n/internal/parser"
 	"golang.org/x/text/cases"
 	lang "golang.org/x/text/language"
@@ -79,7 +80,7 @@ public:
         oss << "{{ formatTranslation $translation $methodParams.Parameters }}";
         return oss.str();
         {{- else }}
-        return "{{ $translation }}";
+        return "{{ escapeSymbolsString $translation }}";
         {{- end }}
     }
     {{- end }}
@@ -211,6 +212,7 @@ func (g *generatorCpp) Get() (string, error) {
 		"formatTranslation": func(translation string, parameters []parameter) string {
 			return formatTranslation(translation, parameters)
 		},
+		"escapeSymbolsString": common.EscapeSymbolsString,
 	}).Parse(localizationTemplate)).Execute(&tpl, g.localeData)
 	if err != nil {
 		return "", err

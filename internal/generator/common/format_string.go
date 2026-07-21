@@ -1,6 +1,11 @@
 package common
 
-import "strings"
+import (
+	"strings"
+
+	"golang.org/x/text/cases"
+	lang "golang.org/x/text/language"
+)
 
 func EscapeSymbolsString(value string) string {
 	var builder strings.Builder
@@ -24,4 +29,17 @@ func EscapeSymbolsString(value string) string {
 	}
 
 	return builder.String()
+}
+
+func CapitalizeAfterHyphen(input string) string {
+	parts := strings.Split(input, "-")
+	var capitalizedParts []string
+
+	for _, part := range parts {
+		if part != "" {
+			capitalized := cases.Title(lang.English).String(part)
+			capitalizedParts = append(capitalizedParts, capitalized)
+		}
+	}
+	return strings.Join(capitalizedParts, "")
 }

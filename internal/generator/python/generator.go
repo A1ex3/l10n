@@ -2,7 +2,6 @@ package generatorpython
 
 import (
 	"bytes"
-	"strings"
 	"text/template"
 
 	"github.com/a1ex3/l10n/internal/generator/common"
@@ -11,36 +10,8 @@ import (
 	lang "golang.org/x/text/language"
 )
 
-type localizationData struct {
-	Languages       []language
-	ClassName       string
-	BaseClassName   string
-	DefaultLangCode string
-	CurrentLangCode string
-	Methods         []method
-	MethodsByName   map[string]method
-}
-
-type language struct {
-	Name         string
-	Code         string
-	Translations map[string]string
-}
-
-type method struct {
-	Name        string
-	Parameters  []parameter
-	Description string
-	Example     string
-}
-
-type parameter struct {
-	Name string
-	Type string // can be "str", "float", or "int"
-}
-
 type generatorPython struct {
-	localeData *localizationData
+	localeData *common.LocalizationData
 }
 
 const localizationTemplate = `class {{.BaseClassName}}:
@@ -77,36 +48,23 @@ class {{ .ClassName }}:
         return {{ .ClassName }}.languages[{{ .ClassName }}.current_language_code]
 `
 
-func capitalizeAfterHyphen(input string) string {
-	parts := strings.Split(input, "-")
-	var capitalizedParts []string
-
-	for _, part := range parts {
-		if part != "" {
-			capitalized := cases.Title(lang.English).String(part)
-			capitalizedParts = append(capitalizedParts, capitalized)
-		}
-	}
-	return strings.Join(capitalizedParts, "")
-}
-
 func (g *generatorPython) transform(className, defaultLanguageCode string, data *parser.Parser) {
 	const baseClassNamePrefix string = "Base"
 
-	ld := &localizationData{
+	ld := &common.LocalizationData{
 		ClassName:       className,
 		BaseClassName:   baseClassNamePrefix + cases.Title(lang.English).String(className),
 		DefaultLangCode: defaultLanguageCode,
 		CurrentLangCode: defaultLanguageCode,
-		MethodsByName:   make(map[string]method),
+		MethodsByName:   make(map[string]common.Method),
 	}
 
-	languages := make([]language, 0)
-	methods := make(map[string]method)
+	languages := make([]common.Language, 0)
+	methods := make(map[string]common.Method)
 
 	for _, loc := range data.ArrayOfLocalizations {
 		for methodName, translateData := range loc.Data {
-			parameters := make([]parameter, 0)
+			parameters := make([]common.Parameter, 0)
 			description := ""
 			example := ""
 			if params := translateData.Params; params != nil {
@@ -125,7 +83,7 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 					default:
 						paramType = "str" // Default to string if type is unknown
 					}
-					parameters = append(parameters, parameter{
+					parameters = append(parameters, common.Parameter{
 						Name: variable.VariableName,
 						Type: paramType,
 					})
@@ -134,7 +92,7 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 
 			// Check if method exists and create if it doesn't
 			if _, exists := methods[methodName]; !exists {
-				m := method{
+				m := common.Method{
 					Name:        methodName,
 					Parameters:  parameters,
 					Description: description,
@@ -148,8 +106,8 @@ func (g *generatorPython) transform(className, defaultLanguageCode string, data 
 		for key, translateData := range loc.Data {
 			translations[key] = translateData.Text
 		}
-		lang := language{
-			Name:         className + capitalizeAfterHyphen(cases.Title(lang.English).String(loc.LanguageCode)),
+		lang := common.Language{
+			Name:         className + common.CapitalizeAfterHyphen(cases.Title(lang.English).String(loc.LanguageCode)),
 			Code:         loc.LanguageCode,
 			Translations: translations,
 		}
@@ -178,9 +136,7 @@ func (g *generatorPython) Get() (string, error) {
 }
 
 func NewGeneratorPython(className, defaultLanguageCode string, data *parser.Parser) *generatorPython {
-	gp := &generatorPython{
-		localeData: nil,
-	}
+	gp := &generatorPython{}
 	gp.transform(className, defaultLanguageCode, data)
 	return gp
 }

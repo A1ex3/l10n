@@ -12,37 +12,8 @@ import (
 	lang "golang.org/x/text/language"
 )
 
-type localizationData struct {
-	PackageName     string
-	Languages       []language
-	ClassName       string
-	BaseClassName   string
-	DefaultLangCode string
-	CurrentLangCode string
-	Methods         []method
-	MethodsByName   map[string]method
-}
-
-type language struct {
-	Name         string
-	Code         string
-	Translations map[string]string
-}
-
-type method struct {
-	Name        string
-	Parameters  []parameter
-	Description string
-	Example     string
-}
-
-type parameter struct {
-	Name string
-	Type string // can be "String", "Float", or "Integer"
-}
-
 type generatorJava struct {
-	localeData *localizationData
+	localeData *common.LocalizationData
 }
 
 const localizationTemplate = `package {{ .PackageName }};
@@ -109,7 +80,7 @@ public final class {{ .ClassName }} {
 }
 `
 
-func formatTranslation(translation string, parameters []parameter) string {
+func formatTranslation(translation string, parameters []common.Parameter) string {
 	// Replace variable names with {0}, {1}, ...
 	for i, param := range parameters {
 		translation = strings.ReplaceAll(translation, "{"+param.Name+"}", "{"+strconv.Itoa(i)+"}")
@@ -120,21 +91,21 @@ func formatTranslation(translation string, parameters []parameter) string {
 func (g *generatorJava) transform(className, packageName, defaultLanguageCode string, data *parser.Parser) {
 	const baseClassNamePrefix = "Base"
 
-	ld := &localizationData{
+	ld := &common.LocalizationData{
 		PackageName:     packageName,
 		ClassName:       className,
 		BaseClassName:   baseClassNamePrefix + cases.Title(lang.English).String(className),
 		DefaultLangCode: defaultLanguageCode,
 		CurrentLangCode: defaultLanguageCode,
-		MethodsByName:   make(map[string]method),
+		MethodsByName:   make(map[string]common.Method),
 	}
 
-	languages := make([]language, 0)
-	methods := make(map[string]method)
+	languages := make([]common.Language, 0)
+	methods := make(map[string]common.Method)
 
 	for _, loc := range data.ArrayOfLocalizations {
 		for methodName, translateData := range loc.Data {
-			parameters := make([]parameter, 0)
+			parameters := make([]common.Parameter, 0)
 			description := ""
 			example := ""
 			if params := translateData.Params; params != nil {
@@ -152,7 +123,7 @@ func (g *generatorJava) transform(className, packageName, defaultLanguageCode st
 					default:
 						paramType = "String"
 					}
-					parameters = append(parameters, parameter{
+					parameters = append(parameters, common.Parameter{
 						Name: variable.VariableName,
 						Type: paramType,
 					})
@@ -160,7 +131,7 @@ func (g *generatorJava) transform(className, packageName, defaultLanguageCode st
 			}
 
 			if _, exists := methods[methodName]; !exists {
-				m := method{
+				m := common.Method{
 					Name:        methodName,
 					Parameters:  parameters,
 					Description: description,
@@ -174,8 +145,8 @@ func (g *generatorJava) transform(className, packageName, defaultLanguageCode st
 		for key, translateData := range loc.Data {
 			translations[key] = translateData.Text
 		}
-		lang := language{
-			Name:         className + capitalizeAfterHyphen(cases.Title(lang.English).String(loc.LanguageCode)),
+		lang := common.Language{
+			Name:         className + common.CapitalizeAfterHyphen(cases.Title(lang.English).String(loc.LanguageCode)),
 			Code:         loc.LanguageCode,
 			Translations: translations,
 		}
@@ -195,7 +166,7 @@ func (g *generatorJava) transform(className, packageName, defaultLanguageCode st
 func (g *generatorJava) Get() (string, error) {
 	var tpl bytes.Buffer
 	err := template.Must(template.New("localization").Funcs(template.FuncMap{
-		"formatTranslation": func(translation string, parameters []parameter) string {
+		"formatTranslation": func(translation string, parameters []common.Parameter) string {
 			return formatTranslation(translation, parameters)
 		},
 		"escapeSymbolsString": common.EscapeSymbolsString,
@@ -204,19 +175,6 @@ func (g *generatorJava) Get() (string, error) {
 		return "", err
 	}
 	return tpl.String(), nil
-}
-
-func capitalizeAfterHyphen(input string) string {
-	parts := strings.Split(input, "-")
-	var capitalizedParts []string
-
-	for _, part := range parts {
-		if part != "" {
-			capitalized := cases.Title(lang.English).String(part)
-			capitalizedParts = append(capitalizedParts, capitalized)
-		}
-	}
-	return strings.Join(capitalizedParts, "")
 }
 
 func NewGeneratorJava(className, packageName, defaultLanguageCode string, data *parser.Parser) *generatorJava {

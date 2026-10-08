@@ -1,32 +1,17 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# gitignore template for Bazel build system
+# website: https://bazel.build/
 
-# Test binary, built with `go test -c`
-*.test
+# Ignore all bazel-* symlinks. There is no full list since this can change
+# based on the name of the directory bazel is cloned into.
+/bazel-*
 
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
+# Directories for the Bazel IntelliJ plugin containing the generated
+# IntelliJ project files and plugin configuration. Separate directories are
+# for the IntelliJ, Android Studio and CLion versions of the plugin.
+/.ijwb/
+/.aswb/
+/.clwb/
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-go.work.sum
-
-# env file
-.env
+dist/
 
 .vscode/
-
-build/
-
-.yml
-.yaml

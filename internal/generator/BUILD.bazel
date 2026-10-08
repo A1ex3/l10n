@@ -1,0 +1,24 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "generator",
+    srcs = ["interface.go"],
+    importpath = "github.com/a1ex3/l10n/internal/generator",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/generator/cpp",
+        "//internal/generator/java",
+        "//internal/generator/javascript",
+        "//internal/generator/kotlin",
+        "//internal/generator/python",
+        "//internal/generator/typescript",
+        "//internal/parser",
+    ],
+)
+
+go_test(
+    name = "generator_test",
+    srcs = ["generator_test.go"],
+    embed = [":generator"],
+    deps = ["//internal/parser"],
+)

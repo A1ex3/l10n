@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "python",
+    srcs = ["generator.go"],
+    importpath = "github.com/a1ex3/l10n/internal/generator/python",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//internal/generator/common",
+        "//internal/parser",
+        "@org_golang_x_text//cases",
+        "@org_golang_x_text//language",
+    ],
+)

@@ -1,0 +1,19 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "l10n_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/a1ex3/l10n/cmd/l10n",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//internal/config",
+        "//internal/generator",
+        "//internal/parser",
+    ],
+)
+
+go_binary(
+    name = "l10n",
+    embed = [":l10n_lib"],
+    visibility = ["//visibility:public"],
+)

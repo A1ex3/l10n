@@ -16,13 +16,13 @@ on:
 
 env:
   CHANGELOG_FILE: changelog.txt
-  APP_INFO_FILE: appinfo
 
 jobs:
   test:
     name: Test
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
@@ -30,87 +30,77 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
         with:
-          go-version: '1.26'
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-${{ matrix.os }}
+          repository-cache: true
+
+      - name: Check BUILD files and MODULE.bazel are up to date
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          bazel run //:gazelle
+          bazel mod tidy
+          git diff --exit-code
 
       - name: Run tests
         shell: bash
-        run: make test
+        run: bazel test //...
 
   release:
     name: Create release
     needs: test
     if: ${{ needs.test.result == 'success' && startsWith(github.ref, 'refs/heads/v') }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    
-    env:
-      BUILD_PATH: build/l10n
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Write appinfo data to environment variables
-        shell: bash
-        run: |
-            source ${{env.APP_INFO_FILE}}
-            echo "L10N_INFO_VERSION=${L10N_INFO_VERSION}" >> $GITHUB_ENV
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
         with:
-          go-version: '1.26'
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}-release
+          repository-cache: true
 
-      - name: Build
+      - name: Write version to environment variables
         shell: bash
-        run: make build
+        run: echo "L10N_INFO_VERSION=$(.ci/get_proj_data.sh -version)" >> "$GITHUB_ENV"
 
-      - name: Get Change log
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-        shell: bash
-        run: |
-          sudo chmod +x .ci/get_changelog.sh
-          ./.ci/get_changelog.sh ${{env.CHANGELOG_FILE}} ${{env.L10N_INFO_VERSION}} > ${{ env.CHANGELOG_FILE }}.tmp
-
-      - name: Rename built program
-        if: matrix.os == 'windows-latest'
+      - name: Build for all platforms
         shell: bash
         run: |
-            mv ${{env.BUILD_PATH}}.exe ${{env.BUILD_PATH}}_windows.exe
-            echo "BUILD_PATH=${{env.BUILD_PATH}}_windows.exe" >> $GITHUB_ENV
+          set -euo pipefail
+          mkdir -p dist
+          TARGET=//cmd/l10n:l10n
+          for plat in linux_amd64 darwin_arm64 windows_amd64; do
+            FLAGS=(
+              "--platforms=@rules_go//go/toolchain:${plat}"
+              "--@rules_go//go/config:pure"
+            )
+            bazel build "${FLAGS[@]}" "$TARGET"
+            SRC=$(bazel cquery "${FLAGS[@]}" --output=files "$TARGET" 2>/dev/null)
+            EXT=""
+            [[ "$plat" == windows_* ]] && EXT=".exe"
+            cp "$SRC" "dist/l10n_${plat}${EXT}"
+          done
+          ls -l dist
 
-      - name: Rename built program
-        if: matrix.os == 'ubuntu-latest'
+      - name: Get change log
         shell: bash
         run: |
-            mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_linux
-            echo "BUILD_PATH=${{env.BUILD_PATH}}_linux" >> $GITHUB_ENV
+          chmod +x .ci/get_changelog.sh
+          ./.ci/get_changelog.sh "${CHANGELOG_FILE}" "${L10N_INFO_VERSION}" > "${CHANGELOG_FILE}.tmp"
 
-      - name: Rename built program
-        if: matrix.os == 'macos-latest'
-        shell: bash
-        run: |
-            mv ${{env.BUILD_PATH}} ${{env.BUILD_PATH}}_macos
-            echo "BUILD_PATH=${{env.BUILD_PATH}}_macos" >> $GITHUB_ENV
-
-      - name: Create GitHub Release (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
-            files: ${{env.BUILD_PATH}}
-            tag_name: ${{env.L10N_INFO_VERSION}}
-            token: ${{ secrets.ACTIONS }}
-
-      - name: Create GitHub Release (Linux & macOS)
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-        uses: softprops/action-gh-release@v3
-        with:
-            body_path: ${{ env.CHANGELOG_FILE }}.tmp
-            files: ${{env.BUILD_PATH}}
-            tag_name: ${{env.L10N_INFO_VERSION}}
-            token: ${{ secrets.ACTIONS }}
+          body_path: ${{ env.CHANGELOG_FILE }}.tmp
+          files: dist/*
+          tag_name: ${{ env.L10N_INFO_VERSION }}
+          token: ${{ secrets.ACTIONS }}

@@ -17,7 +17,7 @@ case "$1" in
 esac
 
 [[ $# -ge 2 ]] && FILE="$2"
-[[ -f "$FILE" ]] || { echo "Файл не найден: $FILE" >&2; exit 1; }
+[[ -f "$FILE" ]] || { echo "File not found: $FILE" >&2; exit 1; }
 
 BLOCK=$(awk '
   /^[[:space:]]*module[[:space:]]*\(/ { f = 1 }
